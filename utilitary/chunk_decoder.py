@@ -14,8 +14,6 @@ class ChunkDecoder():
             'US1_dist': US1_dist,
             'US2_dist': US2_dist
         }
-
-        print(f'US1: {US1_dist}\tUS2: {US2_dist}')
         
         return data
         

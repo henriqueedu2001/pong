@@ -31,8 +31,6 @@ class Chunk():
 
         chunk = self.content
 
-        self.print_chunk()
-
         US1 = chunk[5:8]
         US2 = chunk[8:11]
         
