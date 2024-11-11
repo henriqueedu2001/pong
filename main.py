@@ -14,8 +14,8 @@ BREAK_POINT_STR = b'\xc5\x4e\x44\x00'
 DEFAULT_PORT_NAME = '/dev/ttyUSB0'
 
 DEFAULT_GAME_CONFIG = {
-  'screen_widht': 800,
-  'screen_heigth': 800,
+  'screen_widht': 900,
+  'screen_heigth': 600,
   'serial_port': '/dev/ttyUSB0',
   'mode': 'gameplay',
   'byte_tape': 'in_default',

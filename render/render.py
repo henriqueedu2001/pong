@@ -5,10 +5,12 @@ import os
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-NOT_LOADED_ASTEROID_POSITION = (0, 0)
-NOT_LOADED_SHOOT_POSITION = (0, 0)
+T_largura, T_altura = 900, 600
+M_largura, M_altura = 900, 600
+VERDE = (0, 255, 0)
+VERMELHO = (255, 0, 0)
+AZUL = (0, 0, 255)
 
-GRID_SIZE = 15 # em unidades relativas
 size_factor = 1 
 
 DEFAULT_CONFIG = {
@@ -33,6 +35,12 @@ class RenderEngine():
         self.debug_mode = False
         
         # state variables
+        self.jog1 = Player(0, 0, 10, 100)
+        self.jog2 = Player(M_largura - 10, 0, 10, 100)
+        self.bola = Bola(M_largura//2, M_altura//2, 10, 7, 7)
+
+        self.cor = WHITE
+
         self.score = None
         self.player_direction = None
         self.lifes_quantity = None
@@ -141,56 +149,69 @@ class RenderEngine():
         
         actual_screen = screen
         
-        render_engines = {
-            'initial_menu': self.render_initial_menu,  
-            'gameplay': self.render_gameplay,  
-            'gameover': self.render_gameover,  
-            'players_scores': self.render_players_scores,
-            'register_score': self.render_players_scores,
-            'debug': self.render_debug,
-            'loading': self.render_loading
-        }
-        
-        render_engines[actual_screen]()
+        self.render_gameplay()
         
         return
     
     
     def render_gameplay(self):
         # RenderGameplay.render(self.screen_class, self.data)
+
+        deltaX = 2
+        deltaY = 1
+
+        #Definicao dos objetos
+        jog1 = self.jog1
+        jog2 = self.jog2
+        bola = self.bola
+
+        nex_jog_1_pos, nex_jog_2_pos = 0, 0
+
+        try:
+            nex_jog_1_pos = self.get_pos(self.data['US1_dist'])
+            nex_jog_2_pos = self.get_pos(self.data['US2_dist'])
+
+            self.jog1.update(0, T_altura - nex_jog_1_pos)
+            self.jog2.update(M_largura - 20, T_altura - nex_jog_2_pos)
+
+        except Exception as e:
+            print(f'error: {e}')
+
+        self.jog1.posy = nex_jog_1_pos
+        self.jog2.posy = nex_jog_2_pos
+
+        # print(f'{self.data} {nex_jog_1_pos} {nex_jog_2_pos}')
+
+        if checaColisaoBolaMapa(bola):
+            if bola.dirY == -1:
+                bola.updateVel(bola.velX, bola.velY, bola.dirX, 1)
+            else:
+                if bola.dirY == 1:
+                    bola.updateVel(bola.velX, bola.velY, bola.dirX, -1)
+
+        if checaColisaoJogadorBola(jog1, bola):
+            bola.updateVel(bola.velX + deltaX, bola.velY + deltaY, 1 , bola.dirY)
+
+        if checaColisaoJogadorBola(jog2, bola):
+            bola.updateVel(bola.velX + deltaX, bola.velY + deltaY, -1 , bola.dirY)
         
+        pygame.draw.circle(self.screen, self.cor, (self.bola.posx, self.bola.posy), self.bola.raio)
+        pygame.draw.rect(self.screen, self.cor, self.jog1.geekRect)
+        pygame.draw.rect(self.screen, self.cor, self.jog2.geekRect)
+
         return
     
+
+    def get_pos(self, US_dist):
+
+        return int(US_dist*20)
     
-    def render_gameover(self):
-        # RenderGameOver.render(self.screen_class, self.data)
-        
-        return
-    
-    
-    def render_initial_menu(self):
-        # RenderInitialMenu.render(self.screen_class, self.data)
-        
-        return
-    
-    
-    def render_players_scores(self):
-        # RenderPlayersScores.render(self.screen_class, self.data)
-        
-        return
-    
-    
-    def render_loading(self):
-        # RenderLoading.render(self.screen_class, self.data)
-        
-        return
-    
-    
+
     def render_debug(self):
         # RenderDebug.render(self.screen_class, self.data)    
         return
     
-    
+
     def clear_screen(self):
         self.screen.fill(BLACK)
     
@@ -200,3 +221,87 @@ class RenderEngine():
             print(log_message)
             
         return
+
+
+class Player:
+    def __init__(self, posx, posy, largura, altura):
+        self.posx = posx
+        self.posy = posy
+        self.largura = largura
+        self.altura = altura
+
+        #Retangulo generico do pygame:
+        self.geekRect= pygame.Rect(self.posx, self.posy, self.largura, self.altura)        
+
+
+    def update(self, newx, newy):
+        
+        #Atualiza com os valores recebidos
+        self.posx, self.posy = newx, newy
+
+        #Update do retangulo
+        self.geekRect= pygame.Rect(self.posx, self.posy, self.largura, self.altura)        
+
+
+class Bola:
+    def __init__(self, posx, posy, raio, velX, velY):
+        self.posx = posx
+        self.posy = posy
+        self.raio = raio
+        self.velX = velX
+        self.velY = velY
+        self.dirX = 0
+        self.dirY = 0
+        self.primeiraVez = 1
+
+
+    def update(self):
+        self.posx += self.velX*self.dirX
+        self.posy += self.velY*self.dirY
+
+
+    def updateVel(self, velX, velY, dirX, dirY):
+        self.velX = velX
+        self.velY = velY 
+        self.dirX = dirX
+        self.dirY = dirY
+
+
+def checaColisaoJogadorBola(jogador, bola):
+    limX = jogador.posx + jogador.largura
+    limY1 = jogador.posy
+    limY2 = jogador.posy + jogador.altura
+
+    colisaoX = False
+    colisaoY = False
+
+    #bola na posicao X do jogador
+    if bola.posx + bola.raio <= limX:
+        colisaoX = True
+    else:
+        colisaoX = False
+
+    #bola na posicao Y do Jogador
+    if limY1 <= bola.posy + bola.raio <= limY2:
+        colisaoY = True
+    else:
+        colisaoY = False 
+
+    return (colisaoY and colisaoX)
+
+
+def checaColisaoBolaMapa(bola):
+    if bola.posx + bola.raio >= M_altura:
+        return True
+    else:
+        return False 
+
+
+def checaPonto(bola):
+    if bola.posx <= 0:
+        return -1
+    else:
+        if bola.posx >= M_largura:
+            return 1
+        else: 
+            return 0
