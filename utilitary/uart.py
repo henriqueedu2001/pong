@@ -22,7 +22,7 @@ def show_ports():
         print("No serial port founded!.")
 
 
-def open_port(port_name: str):
+def open_port(port_name: str, baudrate=115200):
     """_summary_
 
     Args:
@@ -32,7 +32,7 @@ def open_port(port_name: str):
         serial.Serial: porta serial
     """
     # Configurar a porta serial (substitua '/dev/ttyUSB0' pelo seu dispositivo serial)
-    serial_port = serial.Serial(port_name, baudrate=115200, timeout=1, parity=serial.PARITY_NONE)
+    serial_port = serial.Serial(port_name, baudrate=baudrate, timeout=1, parity=serial.PARITY_NONE)
 
     return serial_port
 
@@ -60,7 +60,7 @@ def receive_data(serial_port: serial.Serial, n=1, print_data=False):
     return None
 
 
-def send_data(serial_port: serial.Serial, data: bytes):
+def send_data(serial_port: serial.Serial, data: bytes, encoded=False):
     """Envia um byte de dados
 
     Args:
@@ -69,7 +69,11 @@ def send_data(serial_port: serial.Serial, data: bytes):
     """
 
     # Converta a entrada de string para bytes antes de enviar
-    encoded_data = data.encode()
+    encoded_data = data
+    
+    if encoded:
+        encoded_data = encoded_data.encode()
+    
     serial_port.write(encoded_data)  
 
     return
