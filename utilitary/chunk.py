@@ -31,8 +31,8 @@ class Chunk():
 
         chunk = self.content
 
-        US1 = chunk[5:8]
-        US2 = chunk[8:11]
+        US1 = chunk[0:3]
+        US2 = chunk[3:6]
         
         # pedaços de informação
         
