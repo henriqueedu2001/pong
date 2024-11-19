@@ -9,12 +9,18 @@ class ChunkDecoder():
         
         US1_dist = ChunkDecoder.get_US_dist(US1)
         US2_dist = ChunkDecoder.get_US_dist(US2)
+        cursor_1 = ChunkDecoder.get_cursor(US1_dist)
+        cursor_2 = ChunkDecoder.get_cursor(US2_dist)
 
         data = {
             'US1_dist': US1_dist,
-            'US2_dist': US2_dist
+            'US2_dist': US2_dist,
+            'cursor_1': cursor_1,
+            'cursor_2': cursor_2,
         }
-        
+
+        print(data)
+
         return data
         
         
@@ -37,3 +43,14 @@ class ChunkDecoder():
 
         return US_dist
     
+    
+    def get_cursor(US_dist, dead_zone=25, capture_zone=150) -> float:
+        if US_dist < dead_zone:
+            return 0.0
+        
+        if US_dist > dead_zone + capture_zone:
+            return 100.0
+        
+        cursor = 100.0*(US_dist - dead_zone)/capture_zone
+
+        return cursor
