@@ -67,7 +67,6 @@ class Game():
     self.render_config = render_config
     self.render_engine = None
     self.text_font = None
-    self.actual_screen = 'loading'
     
     # uart
     self.port = None
@@ -95,7 +94,7 @@ class Game():
 
     self.init_pygame()
     
-    self.render_engine = RenderEngine(self.screen, actual_screen=self.actual_screen, config=self.render_config)
+    self.render_engine = RenderEngine(pygame_screen=self.screen, config=self.render_config)
     
     # roda o jogo
     self.run_game()
@@ -155,8 +154,9 @@ class Game():
     run = True
     
     while run:
-      self.render()
       self.receive_data(delay=self.delay)
+      self.update_game()
+      self.render()
 
       for event in pygame.event.get():
         # lógica de fim do jogo
@@ -271,11 +271,17 @@ class Game():
       
     data = self.received_game_data
     self.render_engine.load_data(data)
-    self.render_engine.render(screen=self.actual_screen)
+    self.render_engine.render()
     
     return
   
+
+  def update_game(self):
+    # data = self.received_game_data()
+    
+    return
   
+
   def log_message(self, log_message):
     if self.log_messages:
         print(f'[ LOG ] {log_message}')

@@ -19,8 +19,6 @@ class ChunkDecoder():
             'cursor_2': cursor_2,
         }
 
-        print(data)
-
         return data
         
         
