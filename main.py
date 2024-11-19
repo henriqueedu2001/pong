@@ -2,24 +2,24 @@ import pygame
 import random
 import time # for debbuging
 from utilitary import uart as uart
-# from utilitary.byte_tape import ByteTape
+from utilitary.byte_tape import ByteTape
 from utilitary.buffer import Buffer as Buffer
 from utilitary.chunk import Chunk
 from utilitary.binary_handler import BinaryHandler
 from render.render import RenderEngine
 
-BUFFER_SIZE = 5*24
-CHUNK_SIZE = 24
-BREAK_POINT_STR = b'\xc5\x4e\x44\x00'
-DEFAULT_PORT_NAME = '/dev/ttyUSB0'
+BUFFER_SIZE = 9*5
+CHUNK_SIZE = 9
+BREAK_POINT_STR = b'\xff\xff\xff'
+DEFAULT_PORT_NAME = '/dev/ttyUSB1'
 
 DEFAULT_GAME_CONFIG = {
   'screen_widht': 900,
   'screen_heigth': 600,
-  'serial_port': '/dev/ttyUSB0',
-  'mode': 'gameplay',
+  'serial_port': '/dev/ttyUSB1',
+  'mode': 'debug',
   'byte_tape': 'in_default',
-  'delay': 0,
+  'delay': 0.1,
   'print_buffer': False,
   'print_chunk': False,
   'print_uart': False,
@@ -41,7 +41,7 @@ class Game():
     # debugging
     self.debug_mode = True if self.game_config['mode'] == 'debug' else False
     self.debug_byte_tape_name = self.game_config['byte_tape']
-    # self.debug_byte_tape = ByteTape()
+    self.debug_byte_tape = ByteTape()
     self.log_messages = True
     self.degug_count = 0
     self.degug_count_max = 0
