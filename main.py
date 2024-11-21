@@ -7,6 +7,7 @@ from utilitary.buffer import Buffer as Buffer
 from utilitary.chunk import Chunk
 from utilitary.binary_handler import BinaryHandler
 from render.render import RenderEngine
+from engine.game_engine import GameEngine
 
 BUFFER_SIZE = 9*5
 CHUNK_SIZE = 9
@@ -14,12 +15,12 @@ BREAK_POINT_STR = b'\xff\xff\xff'
 DEFAULT_PORT_NAME = '/dev/ttyUSB1'
 
 DEFAULT_GAME_CONFIG = {
-  'screen_widht': 900,
+  'screen_widht': 1200,
   'screen_heigth': 600,
   'serial_port': '/dev/ttyUSB1',
   'mode': 'debug',
-  'byte_tape': 'in_default',
-  'delay': 0.1,
+  'byte_tape': 'vertical_slide',
+  'delay': 0.001,
   'print_buffer': False,
   'print_chunk': False,
   'print_uart': False,
@@ -56,6 +57,11 @@ class Game():
     # pygame parameters
     self.screen = None
     self.clock = None
+
+    # game engine
+    self.game_engine = None
+    self.game_data = None
+    self.keys = None
     
     # buffer
     self.buffer = Buffer(buffer_size=BUFFER_SIZE, chunk_size=CHUNK_SIZE, break_point_str=BREAK_POINT_STR)
@@ -95,7 +101,8 @@ class Game():
     self.init_pygame()
     
     self.render_engine = RenderEngine(pygame_screen=self.screen, config=self.render_config)
-    
+    self.game_engine = GameEngine()
+
     # roda o jogo
     self.run_game()
     
@@ -157,7 +164,7 @@ class Game():
       self.receive_data(delay=self.delay)
       self.update_game()
       self.render()
-
+      
       for event in pygame.event.get():
         # lógica de fim do jogo
         if event.type == pygame.QUIT:
@@ -165,7 +172,7 @@ class Game():
           run = False
       
       pygame.display.flip()
-      
+
     # sair do jogo
     pygame.quit()
   
@@ -269,7 +276,7 @@ class Game():
     if self.print_actual_screen:
       print(self.actual_screen)
       
-    data = self.received_game_data
+    data = self.game_data
     self.render_engine.load_data(data)
     self.render_engine.render()
     
@@ -277,7 +284,9 @@ class Game():
   
 
   def update_game(self):
-    # data = self.received_game_data()
+    self.game_engine.load_data(received_game_data=self.received_game_data, user_keys=self.keys)
+    self.game_engine.update()
+    self.game_data = self.game_engine.get_game_data()
     
     return
   
