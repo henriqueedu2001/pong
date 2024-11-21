@@ -1,6 +1,8 @@
 import random
 import math
 
+from sound.sound_engine import SoundEngine
+
 class GameEngine:
     def __init__(self) -> None:
         self.game_state = None
@@ -12,7 +14,9 @@ class GameEngine:
         self.player_a = Player(x_position=Player.LEFT, y_position=Player.Y_CENTER)
         self.player_b = Player(x_position=Player.RIGHT, y_position=Player.Y_CENTER)
 
-        self.colision_detector = ColisionDetector(self.ball, self.player_a, self.player_b)
+        self.sound_engine = SoundEngine()
+
+        self.colision_detector = ColisionDetector(self.ball, self.player_a, self.player_b, self.sound_engine)
 
         pass
 
@@ -38,7 +42,6 @@ class GameEngine:
             self.player_b.update_position(player_b_y_pos)
             self.colision_detector.detect()
         
-        self.print_game_data()
         return
     
 
@@ -52,7 +55,9 @@ class GameEngine:
                 'ball_x_vel': self.ball.x_vel,
                 'ball_y_vel': self.ball.y_vel,
                 'player_a_y_pos': self.player_a.y_pos,
-                'player_b_y_pos': self.player_b.y_pos
+                'player_b_y_pos': self.player_b.y_pos,
+                'player_a_score': self.player_a.score,
+                'player_b_score': self.player_b.score,
             }
 
         return data
@@ -90,9 +95,10 @@ class Ball:
         magnitude = self.speed
         angle_lim = math.pi*70/180 # 70º graus
 
-        angle = random.uniform(-angle_lim, angle_lim)
-        vel_x = magnitude*math.cos(angle)
-        vel_y = magnitude*math.sin(angle)
+        angle = random.uniform(0, angle_lim)
+        signal = random.choice([1, -1])
+        vel_x = signal*magnitude*math.cos(angle)
+        vel_y = signal*magnitude*math.sin(angle)
         
         return vel_x, vel_y
 
@@ -118,19 +124,28 @@ class Player:
     def __init__(self, x_position, y_position) -> None:
         self.x_pos = x_position
         self.y_pos = y_position
+        self.score = 0
         pass
 
 
     def update_position(self, new_y_pos):
         self.y_pos = new_y_pos
-        return
+    
+
+    def increase_score(self):
+        self.score += 1
+
+
+    def reset_score(self):
+        self.score = 0
 
 
 class ColisionDetector:
-    def __init__(self, ball, player_a, player_b) -> None:
+    def __init__(self, ball, player_a, player_b, sound_engine) -> None:
         self.ball: Ball = ball
         self.player_a: Player = player_a
         self.player_b: Player = player_b
+        self.sound_engine: SoundEngine = sound_engine
         
         self.colision = False
         self.left_wall_colision = False
@@ -157,14 +172,13 @@ class ColisionDetector:
 
         self.colision = self.left_wall_colision or self.right_wall_colision or self.top_wall_colision or self.bottom_wall_colision or self.player_a_colision or self.player_b_colision
 
-        if self.colision:
-            print('colisão')
-            self.handle_colision()
+        if self.colision: self.handle_colision()
 
         return
     
 
     def handle_colision(self):
+        self.sound_engine.play_sound('click')
         if self.top_wall_colision:
             self.ball.y_pos = 100.0
             self.ball.y_vel *= -1
@@ -182,9 +196,11 @@ class ColisionDetector:
             self.ball.x_vel *= -1
         
         if self.left_wall_colision and not self.player_a_colision:
+            self.player_b.increase_score()
             self.ball.restart()
         
         if self.right_wall_colision and not self.player_b_colision:
+            self.player_a.increase_score()
             self.ball.restart()
 
         return

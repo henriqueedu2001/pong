@@ -7,9 +7,8 @@ class Screen():
         self.bottom = self.screen_height
         self.left = 0
         self.right = self.screen_width
-        self.inner_grid_offset_y = self.ru_size(5)
-        self.inner_grid_x_margin = self.ru_x(10)
-        self.inner_grid_y_margin = self.ru_y(10)
+        self.center_x = self.screen_width//2
+        self.center_y = self.screen_height//2
         
         pass
     
@@ -43,28 +42,4 @@ class Screen():
     
     def relative_units_y(self, y):
         return self.ru_x(y)
-    
-    
-    def grid_x(self, x_index):
-        new_x = 0
-        width = self.screen_width
-        horizontal_margin = self.inner_grid_x_margin
-        w, hm  = width, horizontal_margin
-        
-        new_x = int(hm + ((w - 2*hm)/14)*x_index)
-        
-        return new_x
-    
-    
-    def grid_y(self, y_index):
-        new_y = 0
-        height = self.screen_height
-        vertical_margin = self.inner_grid_y_margin
-        h, vm = height, vertical_margin
-        
-        new_y = int(vm + ((h - 2*vm)/14)*(14-y_index))
-        
-        new_y += self.inner_grid_offset_y
-        
-        return new_y
     

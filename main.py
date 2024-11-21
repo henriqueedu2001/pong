@@ -8,6 +8,7 @@ from utilitary.chunk import Chunk
 from utilitary.binary_handler import BinaryHandler
 from render.render import RenderEngine
 from engine.game_engine import GameEngine
+from sound.sound_engine import SoundEngine
 
 BUFFER_SIZE = 9*5
 CHUNK_SIZE = 9
@@ -110,6 +111,7 @@ class Game():
   def init_pygame(self):
     try:
       pygame.init()
+      pygame.mixer.init()
       self.log_message('starting pygame...')
       
       width = self.game_config['screen_widht']

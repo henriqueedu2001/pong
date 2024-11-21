@@ -117,9 +117,10 @@ class RenderEngine:
         self.draw_ball(screen)
         self.draw_player_a(screen)
         self.draw_player_b(screen)
+        self.draw_scores(screen)
 
         return
-    
+
 
     def draw_ball(self, screen: Screen):
         x_pos, y_pos = self.data['ball_x_pos'], self.data['ball_y_pos']
@@ -154,6 +155,21 @@ class RenderEngine:
         
         return
     
+
+    def draw_scores(self, screen: Screen):
+        score_a_y, score_b_y = screen.ru_y(5), screen.ru_y(5)
+        score_x_dist = screen.ru_x(5)
+        score_a_x = screen.center_x - score_x_dist
+        score_b_x = screen.center_x + score_x_dist
+        
+        score_a_text = f'{self.data['player_a_score']}'
+        score_b_text = f'{self.data['player_b_score']}'
+
+        Artist.draw_text(screen, score_a_text, score_a_x, score_a_y, alignment='center')
+        Artist.draw_text(screen, score_b_text, score_b_x, score_b_y, alignment='center')
+        
+        return
+
 
     def get_player_pos(self, screen: Screen, cursor: float) -> int:
         return screen.bottom - screen.ru_y(int(cursor))
