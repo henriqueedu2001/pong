@@ -72,13 +72,14 @@ class GameEngine:
 class Ball:
     SPAWN_X_POS = 100.0
     SPAWN_Y_POS = 50.0
-    DEFAULT_SPEED = 3.0
+    DEFAULT_SPEED = 4.5
 
     def __init__(self) -> None:
         self.speed = Ball.DEFAULT_SPEED
         self.x_pos = Ball.SPAWN_X_POS
         self.y_pos = Ball.SPAWN_Y_POS
         self.x_vel, self.y_vel = self.random_vel()
+        self.resitance = 1e-5
         pass
     
 
@@ -106,6 +107,8 @@ class Ball:
     def update_position(self):
         self.x_pos += self.x_vel
         self.y_pos += self.y_vel
+        self.x_vel = self.x_vel*(1 - self.resitance)
+        self.y_vel = self.y_vel*(1 - self.resitance)
 
     
     def print_info(self):
@@ -124,13 +127,36 @@ class Player:
     def __init__(self, x_position, y_position) -> None:
         self.x_pos = x_position
         self.y_pos = y_position
+        self.vel = 0.0
+        self.vel_magnitude = 0.8
         self.score = 0
+        self.n_means = 8
+        self.position_buffer = self.n_means * [0.0]
         pass
 
 
     def update_position(self, new_y_pos):
-        self.y_pos = new_y_pos
+        self.position_buffer.insert(0, new_y_pos)
+        self.position_buffer.pop()
+
+        self.y_pos = self.get_mean_position()
+        self.vel = self.get_velocity()
     
+
+    def get_mean_position(self):
+        avg = 0
+        for pos in self.position_buffer: avg += pos/self.n_means
+        
+        return avg
+    
+
+    def get_velocity(self):
+        y_0 = self.position_buffer[-1]
+        y_t = self.position_buffer[0]
+        delta_y = self.vel_magnitude*(y_t - y_0)/self.n_means
+        
+        return delta_y
+
 
     def increase_score(self):
         self.score += 1
@@ -174,6 +200,8 @@ class ColisionDetector:
 
         if self.colision: self.handle_colision()
 
+        print(f'{self.player_a.y_pos: .2f},{self.player_a.vel: .2f}')
+
         return
     
 
@@ -190,10 +218,12 @@ class ColisionDetector:
         if self.player_a_colision:
             self.ball.x_pos = 0.0
             self.ball.x_vel *= -1
+            self.ball.x_vel += self.player_a.vel
         
         if self.player_b_colision:
             self.ball.x_pos = 200.0
             self.ball.x_vel *= -1
+            self.ball.x_vel += self.player_b.vel
         
         if self.left_wall_colision and not self.player_a_colision:
             self.player_b.increase_score()
