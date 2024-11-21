@@ -42,7 +42,7 @@ class ChunkDecoder():
         return US_dist
     
     
-    def get_cursor(US_dist, dead_zone=25, capture_zone=150) -> float:
+    def get_cursor(US_dist, dead_zone=50, capture_zone=250) -> float:
         if US_dist < dead_zone:
             return 0.0
         

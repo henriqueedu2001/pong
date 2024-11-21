@@ -72,7 +72,7 @@ class GameEngine:
 class Ball:
     SPAWN_X_POS = 100.0
     SPAWN_Y_POS = 50.0
-    DEFAULT_SPEED = 0.2
+    DEFAULT_SPEED = 3.0
 
     def __init__(self) -> None:
         self.speed = Ball.DEFAULT_SPEED
